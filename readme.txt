@@ -31,7 +31,12 @@ Then go to Settings->Add watermark. You can upload or chose your watermark image
 
 Yes. since all images are cached with a watermark, you need twice the space for images on your server.
 
+= Does this plugin reduce performance = 
+
+Not much. You might experience a longer loading time on the first access to the image (normally when you upload it or on your first view of the post). But afterwards there will be no speed impact, since all logic is encoded in a htaccess-File and not in PHP.
+
 == Screenshots ==
 
 1. You can select an image to use as watermark and to which images watermarks should be applied.
-1. The settings to adjust the position of the watermark. Those are lots of numbers, but there is a (resizeable) live preview area ;-). If you are familiar with CSS, you should have no problem with this.
+2. The settings to adjust the position of the watermark. Those are lots of numbers, but there is a (resizeable) live preview area ;-). If you are familiar with CSS, you should have no problem with this.
+3. You can add or remove watermarks from individual images in the media library.
