@@ -33,4 +33,5 @@ Yes. since all images are cached with a watermark, you need twice the space for 
 
 == Screenshots ==
 
+1. You can select an image to use as watermark and to which images watermarks should be applied.
 1. The settings to adjust the position of the watermark. Those are lots of numbers, but there is a (resizeable) live preview area ;-). If you are familiar with CSS, you should have no problem with this.

@@ -12,7 +12,7 @@
 
 function add_watermark_defaults() {
 	static $defaults = array(
-		'default-active' => '0',
+		'default-active' => '1',
 		'horizontal-pos' => '5',
 		'horizontal-pos-unit' => 'px',
 		'horizontal-pos-from' => 'left',
