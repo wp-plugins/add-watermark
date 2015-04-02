@@ -4,7 +4,7 @@
 	Plugin URI: https://wordpress.org/plugins/add-watermark
 	Description: Adds watermarks to selected images without changing the original image.
 	Author: Michael Zangl
-	Version: 1.0
+	Version: 1.1
 	Author URI: https://wordpress.org/plugins/add-watermark
 	Text Domain: add-watermark
 	Domain Path: /languages
@@ -539,7 +539,6 @@ class AddWatermarkMarker {
 		$watermarkId = add_watermark_option("image");
 		if (!$watermarkId) {
 			$watermarkFile = plugin_dir_path( __FILE__ ) . "images/watermark.png";
-			//throw new RuntimeException("No watermark selected.");
 		} else {
 			$watermarkFile = get_attached_file($watermarkId);
 		}
@@ -712,13 +711,14 @@ class AddWatermarkRequest {
 		if (count($attachments) != 1) {
 			//print_r($attachments);
 			// Second attempt: scan for a post that has that thumbnail.
+			$paths = $this->paths;
 			$myquery = new WP_Query(array(
 					'post_type' => 'attachment',
 					'post_status' => 'any',
 					'meta_query' => array(array(
 						'key' => '_wp_attachment_metadata',
-						'value' => '"' . basename($this->paths['thumbupload']) . '"',
-						'compare' => 'LIKE'
+						'value' => '' . preg_quote($this->paths['thumbfile']) . '',
+						'compare' => 'REGEXP'
 					),
 					array(
 						'key' => '_wp_attached_file',
@@ -726,12 +726,32 @@ class AddWatermarkRequest {
 						'compare' => 'REGEXP'
 					))
 				));
-			$attachments = $myquery->get_posts();
+			$attachments = array_filter($myquery->get_posts(), function($attachment) use($paths) {
+				$meta = wp_get_attachment_metadata($attachment->ID);
+				$file = get_metadata('post', $attachment->ID, '_wp_attached_file', true);
+				$sizefound = $file == $paths['thumbupload'];
+				foreach ($meta['sizes'] as $name => $size) {
+					if ($size['file'] == $paths['thumbfile']) {
+						$sizefound = true;
+					}
+				}
+				$good = $sizefound && strpos($file, dirname($paths['thumbupload'])) === 0;
+				if (add_watermark_option('debug') && !$good) {
+					echo "Possible mat seems not to be our image (has file: $file, searching for: ${paths['thumbfile']}, ${paths['thumbupload']}):\n";
+					print_r($attachment);
+					print_r($meta);
+				}
+				return $good;
+			});
 		}
 		if (count($attachments) != 1) {
+			if (add_watermark_option('debug')) {
+				echo "Wrong number of attachments:\n";
+				print_r($attachments);
+			}
 			$this->error404();
 		}
-		$this->attachment = $attachments[0];
+		$this->attachment = array_values($attachments)[0];
 		if (add_watermark_option('debug')) {
 			echo "Found this attachment:\n";
 			print_r($this->attachment);
@@ -750,6 +770,10 @@ class AddWatermarkRequest {
 				}
 			}
 			if (!$this->size) {
+				if (add_watermark_option('debug')) {
+					echo "Could not find attachment size (" . $this->paths['thumbfile'] . "):\n";
+					print_r($meta);
+				}
 				$this->error404();
 			}
 		}
